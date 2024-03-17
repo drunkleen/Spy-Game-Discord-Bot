@@ -20,7 +20,7 @@ async def countdown(channel, spy_name, player_count):
 
     for seconds in range(TIME_COUNTER_SEC - 1, 0, -1):
         await asyncio.sleep(1)
-        await countdown_msg.edit(content=f"`Countdown: {seconds} seconds`")
+        await countdown_msg.edit(content=f"`Countdown: **{seconds}** seconds`")
 
         countdown_msg = await channel.fetch_message(countdown_msg.id)
         reaction = discord.utils.get(countdown_msg.reactions, emoji="⛔")
@@ -28,7 +28,7 @@ async def countdown(channel, spy_name, player_count):
             break
 
     await asyncio.sleep(1)
-    await countdown_msg.edit(content=f"`⏳ **Time is up!**\n` *{spy_name}* was the spy")
+    await countdown_msg.edit(content=f"`⏳ **Time is up!**\n` **{spy_name}** was the spy")
 
 
 @bot.event
@@ -53,8 +53,15 @@ async def on_message(message):
 
     if user_message == "start spy" and message.author.voice and message.author.voice.channel:
         try:
-            text_to_send = f"===================\nUser **{message.author}** requested a game.\n`Spy Game Initializing...`"
-            sent_message = await message.channel.send(content=text_to_send)
+            text_to_send = f"User **{message.author}** requested a game.\n`Spy Game Initializing...`"
+
+            embed = discord.Embed(
+                title="Spy",
+                url="https://github.com/drunkleen/Spy-Game-Discord-Bot",
+                description=text_to_send,
+                color=0x00FF55
+            )
+            sent_message = await message.channel.send(embed=embed)
 
             voice_channel = message.author.voice.channel
             members_in_channel = voice_channel.members
@@ -66,8 +73,15 @@ async def on_message(message):
             for name in player_names:
                 player_list_string += f"`   - {str(name)}`\n"
 
-            text_to_send += f"\n`⭕ List of Players:`\n{player_list_string}\n"
-            await sent_message.edit(content=text_to_send)
+            text_to_send += f"\n`⭕ List of Players:`\n{player_list_string}"
+
+            embed = discord.Embed(
+                title="Spy",
+                url="https://github.com/drunkleen/Spy-Game-Discord-Bot",
+                description=text_to_send,
+                color=0x00FF55
+            )
+            await sent_message.edit(embed=embed)
 
             spy = random.choice(members_in_channel)
             member_index = members_in_channel.index(spy)
@@ -77,15 +91,43 @@ async def on_message(message):
                 word_list = file.readlines()
                 random_word = random.choice(word_list).strip()
 
-            await spy.send("\n**Spy Game Started**\n===================\n`😈 You're the spy 😈`")
+            direct_message = discord.Embed(
+                title="Spy Game Started",
+                url="https://github.com/drunkleen/Spy-Game-Discord-Bot",
+                description="`😈 You're the spy 😈`",
+                color=0x5400c2
+            )
+            await spy.send(embed=direct_message)
+
+            direct_message = discord.Embed(
+                title="Spy Game Started",
+                url="https://github.com/drunkleen/Spy-Game-Discord-Bot",
+                description=f"The word is:`\n**{random_word}**",
+                color=0x00FFFF
+            )
 
             for member in members_in_channel:
-                await member.send(f"\n**Spy Game Started**\n===================\n`The word is:`\n*{random_word}*")
+                await member.send(embed=direct_message)
 
-            text_to_send += "\n`✅ Game Started. HF!`"
-            await sent_message.edit(content=text_to_send)
+            embed = discord.Embed(
+                title="Spy",
+                url="https://github.com/drunkleen/Spy-Game-Discord-Bot",
+                description=text_to_send + "\n`✅ Game Started. HF!`",
+                color=0x00FF55
+            )
+
+            await sent_message.edit(embed=embed)
 
             await countdown(channel, spy.name, len(player_names))
+
+            embed = discord.Embed(
+                title="Spy",
+                url="https://github.com/drunkleen/Spy-Game-Discord-Bot",
+                description=text_to_send + "\n`✅ Game Ended!`",
+                color=0x00FF55
+            )
+
+            await sent_message.edit(embed=embed)
 
         except Exception as e:
             await message.channel.send("Sorry, there was an error!")
